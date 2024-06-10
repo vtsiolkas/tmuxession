@@ -28,7 +28,7 @@ The basic workflow of `tmuxession` is as follows:
 - You run `tmuxession save` from within a pane in the tmux session. This will
   extract all the necessary information about the session and create a shell
   script that "recreates" the session from start. By default, the script is
-  saved in tmuxession's data directory (XDG_DATA_HOME/tmuxession/session/)
+  saved in tmuxession's data directory (usually `~/.local/share/tmuxession/`)
   using the name of the current directory as the script name.
 - You can run `tmuxession edit` to edit the script. This is recommended in
   order to review the commands that were captured running inside the session's
