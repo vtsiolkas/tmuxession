@@ -36,7 +36,7 @@ fn get_tmux_windows() -> Vec<TmuxWindow> {
     let output = Command::new("tmux")
         .arg("list-windows")
         .arg("-F")
-        .arg("#{window_index}:#{window_name}:#{window_layout}:#{window_active}")
+        .arg("#{window_index}:#{window_name}:#{window_visible_layout}:#{window_active}")
         .output()
         .unwrap();
     let windows_output = String::from_utf8_lossy(&output.stdout);

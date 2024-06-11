@@ -9,11 +9,13 @@ restore tmux sessions on a per-project basis.
 tmuxession save     # save the current tmux session, must be run from within tmux
 tmuxession restore  # restore the tmux session associated with the current directory
 tmuxession edit     # edit the tmux session script associated with the current directory
+tmuxession list     # list all saved tmux sessions and pick one to restore/switch into
 ```
 
 ## Installation
 
-Download the executable from the Releases page.
+Download the executable from the [Releases](https://github.com/vtsiolkas/tmuxession/releases)
+page.
 
 _Note:_ `tmuxession` is designed to work with tmux 3.1 and above. It may work
 with older versions, but it hasn't been tested.
@@ -30,12 +32,20 @@ The basic workflow of `tmuxession` is as follows:
   script that "recreates" the session from start. By default, the script is
   saved in tmuxession's data directory (usually `~/.local/share/tmuxession/`)
   using the name of the current directory as the script name.
-- You can run `tmuxession edit` to edit the script. This is recommended in
-  order to review the commands that were captured running inside the session's
-  panes and make any necessary changes.
+- You can run `tmuxession edit` to edit the saved session script. This is
+  recommended in order to review the commands that were captured running inside
+  the session's panes and make any necessary changes.
 - You can then run `tmuxession restore` from the same directory to restore the
   session. This will run the script created by `tmuxession save`, recreate the
   session and attach to it. `tmuxession restore` should be run outside of tmux.
+- Alternatively, you can run `tmuxession list` to see all saved sessions and
+  pick one to restore regardless of the cwd. This is useful if you have
+  multiple saved sessions and want to switch between them quickly.
+
+When restoring a session, `tmuxession` checks if a session with the same name
+is already running. If it is, it will prompt you to either attach to the
+existing session, kill it and restore the saved session, or restore the saved
+session with a different name.
 
 _Note:_ If you are a Neovim user, `tmuxession` works well with the
 [auto-session](https://github.com/rmagatti/auto-session) nvim plugin, which

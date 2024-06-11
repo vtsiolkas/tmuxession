@@ -16,6 +16,8 @@ pub fn generate_tmux_session_script(session: &TmuxSession) -> String {
     shell_script.push_str("### Create a new detached tmux session\n");
     shell_script.push_str(&format!("tmux new-session -d -s \"$session_name\"\n\n\n"));
 
+    let mut active_pane = String::new();
+    let mut active_window = String::new();
     for window in &session.windows {
         shell_script.push_str(format!("## Window {}:{}\n", &window.id, &window.name).as_str());
         let target_window = format!("\"$session_name\":{}", &window.id);
@@ -24,6 +26,7 @@ pub fn generate_tmux_session_script(session: &TmuxSession) -> String {
             &target_window, &window.name, &window.panes[0].cwd, &window.panes[0].commands[0]
         ));
 
+        let mut active_pane_current_window = String::new();
         for (i, pane) in window.panes.iter().enumerate() {
             if i != 0 {
                 // Create a new pane and run the first command in it
@@ -35,10 +38,11 @@ pub fn generate_tmux_session_script(session: &TmuxSession) -> String {
             }
 
             let target_pane = format!("\"$session_name\":{}.{}", &window.id, pane.id);
-            if pane.active {
-                // Select the active pane
-                shell_script.push_str(format!("# Set active pane {}\n", &pane.id).as_str());
-                shell_script.push_str(&format!("tmux select-pane -t {}\n\n", &target_pane));
+            if window.active && pane.active {
+                // Set the active pane to select it at the end
+                active_pane = format!("tmux select-pane -t {}\n\n", &target_pane);
+            } else if pane.active {
+                active_pane_current_window = format!("tmux select-pane -t {}\n\n", &target_pane);
             }
 
             // Run the second command in the pane
@@ -51,10 +55,14 @@ pub fn generate_tmux_session_script(session: &TmuxSession) -> String {
             }
         }
 
+        // Select the active pane in the current window
+        shell_script
+            .push_str(format!("# Select the active pane in window {}\n", &window.name).as_str());
+        shell_script.push_str(&active_pane_current_window);
+
         if window.active {
-            // Select the active pane
-            shell_script.push_str(format!("# Set active window {}\n", &window.id).as_str());
-            shell_script.push_str(&format!("tmux select-window -t {}\n\n", &target_window));
+            // Set the active window to select it at the end
+            active_window = format!("tmux select-window -t {}\n\n", &target_window);
         }
 
         // Set the layout of the window
@@ -67,9 +75,12 @@ pub fn generate_tmux_session_script(session: &TmuxSession) -> String {
             .push_str(format!("## End of window {}:{}\n\n", &window.id, &window.name).as_str());
     }
 
-    // Attach to the session
-    shell_script.push_str("\n### Attach to the session\n");
-    shell_script.push_str("tmux attach-session -t \"$session_name\"\n");
+    // Select the active window
+    shell_script.push_str("### Select the active window\n");
+    shell_script.push_str(&active_window);
+    // Select the active pane
+    shell_script.push_str("### Select the active pane\n");
+    shell_script.push_str(&active_pane);
 
     shell_script
 }

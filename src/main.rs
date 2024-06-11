@@ -1,9 +1,13 @@
 mod common;
 mod edit_session_script;
 mod generate_script;
+mod list_sessions;
 mod restore_session;
 mod save_session;
+mod tmux_commands;
 
+use crate::common::is_inside_tmux;
+use crate::list_sessions::list_sessions;
 use clap::{Parser, Subcommand};
 use edit_session_script::edit_session_script;
 use restore_session::restore_tmux_session;
@@ -40,22 +44,21 @@ enum Commands {
         script: Option<String>,
     },
     /// Edit the saved TMUX session for the current directory
-    /// This command will open the saved script if it extists
+    /// This command will open the saved script if it exists
     /// in $EDITOR or vi
     #[command(alias = "e")]
     Edit {},
+    /// List all saved TMUX sessions and allows to pick one to restore
+    #[command(alias = "l")]
+    List {},
 }
 
 fn main() {
     let args = Cli::parse();
 
-    let inside_tmux = env::var("TMUX").is_ok()
-        || env::var("TERM_PROGRAM").unwrap_or_default() == "tmux"
-        || env::var("TMUX_PANE").is_ok();
-
     match args.command {
         Commands::Save { script } => {
-            if !inside_tmux {
+            if !is_inside_tmux() {
                 eprintln!("Error: `tmuxession save` must be run inside a tmux session");
                 std::process::exit(1);
             }
@@ -66,6 +69,9 @@ fn main() {
         }
         Commands::Edit {} => {
             edit_session_script();
+        }
+        Commands::List {} => {
+            list_sessions();
         }
     }
 }
