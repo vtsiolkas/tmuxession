@@ -1,10 +1,7 @@
 use crate::tmux_commands::get_current_pane_cwd;
-use crossterm::event::{self, Event, KeyCode};
-use crossterm::terminal;
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::env;
-use std::io::{stdout, Write};
 use std::path::PathBuf;
 use urlencoding::encode;
 use xdg::BaseDirectories;
@@ -41,38 +38,6 @@ pub struct UserOption {
 
 lazy_static! {
     pub static ref TMUX_SESSION_RE: Regex = Regex::new(r"(?m)^session_name=(.*)$").unwrap();
-}
-
-pub fn get_user_option(title: &str, options: Vec<UserOption>) -> char {
-    let mut stdout = stdout();
-    println!("{}", title);
-
-    for option in &options {
-        println!("{}", option.label);
-    }
-
-    print!("Enter your choice: ");
-    terminal::enable_raw_mode().unwrap();
-
-    let char;
-
-    loop {
-        stdout.flush().unwrap();
-
-        if let Event::Key(key_event) = event::read().unwrap() {
-            if let KeyCode::Char(c) = key_event.code {
-                if let Some(option) = options.iter().find(|o| o.keybind == c) {
-                    print!("{}\n", option.keybind);
-                    char = c;
-                    break;
-                }
-            }
-        }
-    }
-    terminal::disable_raw_mode().unwrap();
-    print!("\r");
-
-    char
 }
 
 pub fn get_data_dir() -> PathBuf {

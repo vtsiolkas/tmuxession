@@ -1,10 +1,11 @@
 use crate::common::{
-    capture_session_name_from_script, get_session_script_path, get_user_option, is_inside_tmux,
-    UserOption, TMUX_SESSION_RE,
+    capture_session_name_from_script, get_session_script_path, is_inside_tmux, UserOption,
+    TMUX_SESSION_RE,
 };
 use crate::tmux_commands::{
     attach_session, get_current_tmux_session, kill_session, switch_session,
 };
+use crate::ui::get_user_option;
 use std::fs;
 use std::io::{self, Write};
 use std::path::PathBuf;
@@ -27,25 +28,23 @@ pub fn restore_tmux_session(script: Option<String>) {
     }
 
     while check_session_exists(&session_name) {
-        let user_option = get_session_exists_option();
+        let user_option = get_session_exists_option(&session_name);
 
         match user_option {
             'A' => {
                 if is_inside_tmux() {
                     switch_session(&session_name);
-                    std::process::exit(0);
                 } else {
                     attach_session(&session_name);
-                    std::process::exit(0);
                 }
             }
             'K' => {
                 let current_session_name = get_current_tmux_session();
                 if let Some(current_session_name) = current_session_name {
                     if current_session_name == session_name {
-                        println!("You are currently in the session you are trying to restore.");
-                        println!("Try restoring from a different session or from outside tmux.");
-                        std::process::exit(0);
+                        println!("You are currently inside the session you are trying to kill.");
+                        println!("Try doing this from a different session or from outside tmux.");
+                        std::process::exit(1);
                     }
                 }
                 kill_session(&session_name);
@@ -70,7 +69,7 @@ pub fn restore_tmux_session(script: Option<String>) {
         }
     }
 
-    println!("Restoring tmux session {}...", &session_name);
+    println!("Restoring tmux session \"{}\"...", &session_name);
 
     // Run the script to restore the session detached
     let mut script_execution = Command::new("sh")
@@ -113,8 +112,11 @@ fn check_session_exists(session_name: &str) -> bool {
     stdout.lines().any(|line| line == session_name)
 }
 
-fn get_session_exists_option() -> char {
-    let title = "A session with the same name already exists.";
+fn get_session_exists_option(session_name: &str) -> char {
+    let title = format!(
+        "A session with the name \"{}\" already exists in the tmux server.",
+        &session_name
+    );
     let options = vec![
         UserOption {
             keybind: 'A',
@@ -134,5 +136,5 @@ fn get_session_exists_option() -> char {
         },
     ];
 
-    get_user_option(title, options)
+    get_user_option(&title, options)
 }
