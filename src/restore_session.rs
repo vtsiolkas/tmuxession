@@ -2,7 +2,9 @@ use crate::common::{
     capture_session_name_from_script, get_session_script_path, get_user_option, is_inside_tmux,
     UserOption, TMUX_SESSION_RE,
 };
-use crate::tmux_commands::{attach_session, kill_session, switch_session};
+use crate::tmux_commands::{
+    attach_session, get_current_tmux_session, kill_session, switch_session,
+};
 use std::fs;
 use std::io::{self, Write};
 use std::path::PathBuf;
@@ -38,6 +40,14 @@ pub fn restore_tmux_session(script: Option<String>) {
                 }
             }
             'K' => {
+                let current_session_name = get_current_tmux_session();
+                if let Some(current_session_name) = current_session_name {
+                    if current_session_name == session_name {
+                        println!("You are currently in the session you are trying to restore.");
+                        println!("Try restoring from a different session or from outside tmux.");
+                        std::process::exit(0);
+                    }
+                }
                 kill_session(&session_name);
             }
             'R' => {
@@ -71,10 +81,11 @@ pub fn restore_tmux_session(script: Option<String>) {
 
     let _ = script_execution
         .wait()
-        .expect("Failed to wait for tmux script to finish");
+        .expect("Failed to wait for session restore script to finish");
 
     if is_inside_tmux() {
         switch_session(&session_name);
+        std::process::exit(0);
     } else {
         attach_session(&session_name);
     }

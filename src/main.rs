@@ -35,6 +35,10 @@ enum Commands {
         /// Optional script parameter
         #[arg(long)]
         script: Option<String>,
+        /// Optional session name parameter
+        /// If not provided, the current session name will be used
+        #[arg(long)]
+        name: Option<String>,
     },
     /// Restore the TMUX session
     #[command(alias = "r")]
@@ -57,12 +61,12 @@ fn main() {
     let args = Cli::parse();
 
     match args.command {
-        Commands::Save { script } => {
+        Commands::Save { script, name } => {
             if !is_inside_tmux() {
                 eprintln!("Error: `tmuxession save` must be run inside a tmux session");
                 std::process::exit(1);
             }
-            save_tmux_session(script);
+            save_tmux_session(script, name);
         }
         Commands::Restore { script } => {
             restore_tmux_session(script);

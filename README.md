@@ -15,7 +15,22 @@ tmuxession list     # list all saved tmux sessions and pick one to restore/switc
 ## Installation
 
 Download the executable from the [Releases](https://github.com/vtsiolkas/tmuxession/releases)
-page.
+page. Move the executable to a directory in your PATH (e.g. `~/.local/bin/`).
+
+Optionally, you can set an alias in your shell configuration file (e.g.
+`~/.bashrc`, `~/.zshrc`, etc.):
+
+```sh
+alias tm="tmuxession"
+```
+
+_Note:_ `tm` is just an example. You can use any alias you like.
+
+You can also set a tmux keybinding to quickly save the current session:
+
+```
+bind-key W confirm-before -p "Save session?" "run-shell 'tmuxession save'"
+```
 
 _Note:_ `tmuxession` is designed to work with tmux 3.1 and above. It may work
 with older versions, but it hasn't been tested.

@@ -3,11 +3,15 @@ use crate::generate_script::generate_tmux_session_script;
 use std::process::Command;
 use std::{fs, path::PathBuf};
 
-pub fn save_tmux_session(script: Option<String>) {
-    let session_name = get_tmux_session_name();
+pub fn save_tmux_session(script: Option<String>, provided_session_name: Option<String>) {
+    let session_name = match provided_session_name {
+        Some(name) => name,
+        None => get_tmux_session_name(),
+    };
+
     let windows = get_tmux_windows();
     let session = TmuxSession {
-        name: session_name,
+        name: session_name.clone(),
         windows,
     };
 
@@ -17,9 +21,13 @@ pub fn save_tmux_session(script: Option<String>) {
     };
 
     let shell_script = generate_tmux_session_script(&session);
-    fs::write(file_path, shell_script).unwrap();
+    fs::write(&file_path, shell_script).unwrap();
 
-    println!("Tmux session saved successfully.");
+    println!("Tmux session `{}` saved successfully.", &session_name);
+    println!(
+        "Script for restoring the session saved under: {}",
+        &file_path.display()
+    );
 }
 
 fn get_tmux_session_name() -> String {
@@ -36,7 +44,7 @@ fn get_tmux_windows() -> Vec<TmuxWindow> {
     let output = Command::new("tmux")
         .arg("list-windows")
         .arg("-F")
-        .arg("#{window_index}:#{window_name}:#{window_visible_layout}:#{window_active}")
+        .arg("#{window_index}:#{window_name}:#{window_layout}:#{window_active}:#{window_zoomed_flag}")
         .output()
         .unwrap();
     let windows_output = String::from_utf8_lossy(&output.stdout);
@@ -49,6 +57,7 @@ fn get_tmux_windows() -> Vec<TmuxWindow> {
             let name = parts[1].to_string();
             let layout = parts[2].to_string();
             let active = parts[3] == "1";
+            let zoomed = parts[4] == "1";
             let panes = get_tmux_panes(&id);
 
             TmuxWindow {
@@ -57,6 +66,7 @@ fn get_tmux_windows() -> Vec<TmuxWindow> {
                 layout,
                 panes,
                 active,
+                zoomed,
             }
         })
         .collect()

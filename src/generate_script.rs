@@ -18,6 +18,7 @@ pub fn generate_tmux_session_script(session: &TmuxSession) -> String {
 
     let mut active_pane = String::new();
     let mut active_window = String::new();
+    let mut zoomed_panes: Vec<String> = vec![];
     for window in &session.windows {
         shell_script.push_str(format!("## Window {}:{}\n", &window.id, &window.name).as_str());
         let target_window = format!("\"$session_name\":{}", &window.id);
@@ -43,6 +44,10 @@ pub fn generate_tmux_session_script(session: &TmuxSession) -> String {
                 active_pane = format!("tmux select-pane -t {}\n\n", &target_pane);
             } else if pane.active {
                 active_pane_current_window = format!("tmux select-pane -t {}\n\n", &target_pane);
+            }
+
+            if pane.active && window.zoomed {
+                zoomed_panes.push(format!("tmux resize-pane -t {} -Z\n", &target_pane));
             }
 
             // Run the second command in the pane
@@ -73,6 +78,13 @@ pub fn generate_tmux_session_script(session: &TmuxSession) -> String {
         ));
         shell_script
             .push_str(format!("## End of window {}:{}\n\n", &window.id, &window.name).as_str());
+    }
+
+    if !zoomed_panes.is_empty() {
+        shell_script.push_str("### Zoom the zoomed panes\n");
+        for zoomed_pane in zoomed_panes {
+            shell_script.push_str(&zoomed_pane);
+        }
     }
 
     // Select the active window

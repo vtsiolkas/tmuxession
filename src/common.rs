@@ -1,3 +1,4 @@
+use crate::tmux_commands::get_current_pane_cwd;
 use crossterm::event::{self, Event, KeyCode};
 use crossterm::terminal;
 use lazy_static::lazy_static;
@@ -5,7 +6,6 @@ use regex::Regex;
 use std::env;
 use std::io::{stdout, Write};
 use std::path::PathBuf;
-use std::process::Command;
 use urlencoding::encode;
 use xdg::BaseDirectories;
 
@@ -23,6 +23,7 @@ pub struct TmuxWindow {
     pub name: String,
     pub layout: String,
     pub active: bool,
+    pub zoomed: bool,
     pub panes: Vec<TmuxPane>,
 }
 
@@ -74,22 +75,6 @@ pub fn get_user_option(title: &str, options: Vec<UserOption>) -> char {
     char
 }
 
-pub fn run_tmux_command(args: &[&str]) {
-    let output = Command::new("tmux")
-        .args(args)
-        .output()
-        .expect("Failed to execute tmux command");
-
-    if !output.stderr.is_empty() {
-        let stderr = std::str::from_utf8(&output.stderr).expect("Failed to read stderr");
-        eprintln!("Error: {}", stderr);
-        std::process::exit(1);
-    }
-
-    // let stdout = std::str::from_utf8(&output.stdout).expect("Failed to read stdout");
-    // println!("Command: {}, Output: {}", args.join(" "), stdout);
-}
-
 pub fn get_data_dir() -> PathBuf {
     let xdg_dirs = BaseDirectories::with_prefix("tmuxession").unwrap();
     xdg_dirs.get_data_home()
@@ -97,8 +82,8 @@ pub fn get_data_dir() -> PathBuf {
 
 pub fn get_session_script_path() -> PathBuf {
     let xdg_dirs = BaseDirectories::with_prefix("tmuxession").unwrap();
-    let current_dir = env::current_dir().unwrap();
-    let file_name = encode(current_dir.to_str().unwrap()).to_string();
+    let current_dir = get_current_pane_cwd();
+    let file_name = encode(&current_dir);
     xdg_dirs
         .place_data_file(format!("{}.sh", file_name))
         .unwrap()
