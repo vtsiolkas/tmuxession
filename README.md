@@ -102,5 +102,4 @@ you restore the session. Always review the script before restoring the session.
   probably be implemented in the future.
 
 [auto-session]: https://github.com/rmagatti/auto-session
-[tutorial]: contrib/tutorial.webm
 [latest-release]: https://github.com/vtsiolkas/tmuxession/releases
