@@ -5,6 +5,8 @@ restore tmux sessions on a per-project basis.
 
 ## Getting started
 
+![Tutorial][tutorial]
+
 ```sh
 tmuxession save     # save the current tmux session, must be run from within tmux
 tmuxession restore  # restore the tmux session associated with the current directory
@@ -14,8 +16,8 @@ tmuxession list     # list all saved tmux sessions and pick one to restore/switc
 
 ## Installation
 
-Download the executable from the [Releases](https://github.com/vtsiolkas/tmuxession/releases)
-page. Move the executable to a directory in your PATH (e.g. `~/.local/bin/`).
+Download the executable from the [Releases][latest-release] page. Move the
+executable to a directory in your PATH (e.g. `~/.local/bin/`).
 
 Optionally, you can set an alias in your shell configuration file (e.g.
 `~/.bashrc`, `~/.zshrc`, etc.):
@@ -26,7 +28,8 @@ alias tm="tmuxession"
 
 _Note:_ `tm` is just an example. You can use any alias you like.
 
-You can also set a tmux keybinding to quickly save the current session:
+You can also set a tmux keybinding in your tmux.conf to quickly save the
+current session:
 
 ```
 bind-key W confirm-before -p "Save session?" "run-shell 'tmuxession save'"
@@ -63,7 +66,7 @@ existing session, kill it and restore the saved session, or restore the saved
 session with a different name.
 
 _Note:_ If you are a Neovim user, `tmuxession` works well with the
-[auto-session](https://github.com/rmagatti/auto-session) nvim plugin, which
+[auto-session][auto-session] nvim plugin, which
 automatically restores your nvim session based on the cwd.
 
 ## Capture
@@ -97,3 +100,7 @@ you restore the session. Always review the script before restoring the session.
 - `tmuxession` doesn't yet capture some advanced tmux features like
   synchronized panes, session-specific options, etc. Most of these will
   probably be implemented in the future.
+
+[auto-session]: https://github.com/rmagatti/auto-session
+[tutorial]: contrib/tutorial.webm
+[latest-release]: https://github.com/vtsiolkas/tmuxession/releases

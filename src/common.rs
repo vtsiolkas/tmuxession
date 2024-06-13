@@ -47,7 +47,10 @@ pub fn get_data_dir() -> PathBuf {
 
 pub fn get_session_script_path() -> PathBuf {
     let xdg_dirs = BaseDirectories::with_prefix("tmuxession").unwrap();
-    let current_dir = get_current_pane_cwd();
+    let current_dir = match is_inside_tmux() {
+        true => get_current_pane_cwd(),
+        false => env::current_dir().unwrap().to_string_lossy().to_string(),
+    };
     let file_name = encode(&current_dir);
     xdg_dirs
         .place_data_file(format!("{}.sh", file_name))
