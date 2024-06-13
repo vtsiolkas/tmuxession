@@ -5,7 +5,7 @@ restore tmux sessions on a per-project basis.
 
 ## Getting started
 
-![Tutorial][tutorial]
+https://github.com/vtsiolkas/tmuxession/assets/2311865/07527e75-409d-4116-84f1-b28cb28fc332
 
 ```sh
 tmuxession save     # save the current tmux session, must be run from within tmux
