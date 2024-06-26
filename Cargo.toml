@@ -1,6 +1,6 @@
 [package]
 name = "tmuxession"
-version = "0.2.0"
+version = "0.5.0"
 authors = ["Vasilis Tsiolkas"]
 description = "A tool for saving and restoring tmux sessions"
 edition = "2021"
