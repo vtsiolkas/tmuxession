@@ -102,4 +102,4 @@ you restore the session. Always review the script before restoring the session.
   probably be implemented in the future.
 
 [auto-session]: https://github.com/rmagatti/auto-session
-[latest-release]: https://github.com/vtsiolkas/tmuxession/releases
+[latest-release]: https://github.com/vtsiolkas/tmuxession/releases/latest

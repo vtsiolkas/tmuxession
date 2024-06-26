@@ -17,8 +17,13 @@ pub fn restore_tmux_session(script: Option<String>) {
         None => get_session_script_path(),
     };
 
-    let mut shell_script = fs::read_to_string(&file_path)
-        .expect(format!("Could not read file: {:?}", &file_path).as_str());
+    let mut shell_script = match fs::read_to_string(&file_path) {
+        Ok(content) => content,
+        Err(_) => {
+            eprintln!("No session script found for the current directory");
+            std::process::exit(1);
+        }
+    };
 
     // Read the session_name value
     let mut session_name = capture_session_name_from_script(&shell_script);

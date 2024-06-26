@@ -54,7 +54,7 @@ enum Commands {
     #[command(visible_alias = "e")]
     Edit {},
     /// List all saved TMUX sessions and allows to pick one to restore [default]
-    #[command(visible_alias = "l")]
+    #[command(visible_aliases = ["ls", "l"])]
     List {},
 }
 

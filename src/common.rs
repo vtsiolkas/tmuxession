@@ -42,7 +42,9 @@ lazy_static! {
 
 pub fn get_data_dir() -> PathBuf {
     let xdg_dirs = BaseDirectories::with_prefix("tmuxession").unwrap();
-    xdg_dirs.get_data_home()
+    let data_dir = xdg_dirs.get_data_home();
+    std::fs::create_dir_all(&data_dir).expect("Could not create tmuxession data directory");
+    data_dir
 }
 
 pub fn get_session_script_path() -> PathBuf {
